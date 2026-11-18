@@ -2,7 +2,7 @@ package fr.xan.souvenirnotifications
 
 import android.app.Notification
 import android.content.Intent
-import android.graphics.Bitmap
+import android.graphics.*
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -152,7 +152,7 @@ class NotificationArchiveService : NotificationListenerService() {
         val picture = getBitmapExtra(extras, Notification.EXTRA_PICTURE)
             ?: if (android.os.Build.VERSION.SDK_INT >= 31) {
                 getIconExtra(extras, Notification.EXTRA_PICTURE_ICON)?.let { icon ->
-                    runCatching { icon.loadDrawable(this)?.toBitmap() }.getOrNull()
+                    iconToBitmap(icon)
                 }
             } else null
         val groupAvatar = if (isGroupConversation) notificationAvatar(sbn.notification) else null
@@ -383,12 +383,12 @@ class NotificationArchiveService : NotificationListenerService() {
         return getBitmapExtra(extras, Notification.EXTRA_LARGE_ICON_BIG)
             ?: getBitmapExtra(extras, Notification.EXTRA_LARGE_ICON)
             ?: getIconExtra(extras, Notification.EXTRA_LARGE_ICON_BIG)?.let { icon ->
-                runCatching { icon.loadDrawable(this)?.toBitmap() }.getOrNull()
+                iconToBitmap(icon)
             }
             ?: getIconExtra(extras, Notification.EXTRA_LARGE_ICON)?.let { icon ->
-                runCatching { icon.loadDrawable(this)?.toBitmap() }.getOrNull()
+                iconToBitmap(icon)
             }
-            ?: runCatching { notification.getLargeIcon()?.loadDrawable(this)?.toBitmap() }.getOrNull()
+            ?: iconToBitmap(notification.getLargeIcon())
     }
 
     private fun messageBundles(extras: Bundle): Array<out android.os.Parcelable>? =
@@ -417,13 +417,26 @@ class NotificationArchiveService : NotificationListenerService() {
             ?: person?.uri?.takeIf(String::isNotBlank)
             ?: name
         val personAvatar = person?.icon?.let { icon ->
-            runCatching { icon.loadDrawable(this)?.toBitmap() }.getOrNull()
+            iconToBitmap(icon)
         }
         // The notification's large icon can be the group picture, not the sender.
         // Keep it attached to the conversation and only use it as a profile fallback
         // for direct chats when Android did not provide a Person icon.
         val avatar = personAvatar ?: if (!isGroupConversation) notificationAvatar(notification) else null
         return Triple(name, key, avatar)
+    }
+
+    /** Decode bitmap and URI backed Icons supplied for a notification sender. */
+    @android.annotation.SuppressLint("NewApi")
+    private fun iconToBitmap(icon: Icon?): Bitmap? {
+        if (icon == null) return null
+        runCatching { icon.loadDrawable(this)?.toBitmap() }.getOrNull()?.let { return it }
+        if (android.os.Build.VERSION.SDK_INT < 28) return null
+        if (icon.type != Icon.TYPE_URI && icon.type != Icon.TYPE_URI_ADAPTIVE_BITMAP) return null
+        val uri = runCatching { icon.uri }.getOrNull() ?: return null
+        return runCatching {
+            contentResolver.openInputStream(uri)?.use { input -> BitmapFactory.decodeStream(input) }
+        }.getOrNull()
     }
 
     private fun senderPrefix(text: String): Pair<String, String>? {
