@@ -94,6 +94,8 @@ class MainActivity : Activity() {
     private var conversationFilterIsGroup = false
     private var historyVisibleCount = 60
     private var showAllTrashMessages = false
+    private var messageSelectionMode = false
+    private val selectedMessageIds = linkedSetOf<Long>()
     private var conversationVisibleCount = 60
     private var storageRefreshGeneration = 0
     private val archiveRefreshHandler = Handler(Looper.getMainLooper())
@@ -243,7 +245,7 @@ class MainActivity : Activity() {
             ))
         })
         content.requestFocus()
-        refreshScreen()
+        
     }
 
     override fun onResume() {
@@ -1376,7 +1378,7 @@ class MainActivity : Activity() {
         }
         if (inTrash) {
             historyContainer.addView(Button(this).apply {
-                text = getString(R.string.restore_all_trash)
+                text = "↑  ${getString(R.string.restore_all_trash)}"
                 textSize = 14f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.WHITE)
@@ -1468,6 +1470,78 @@ class MainActivity : Activity() {
         }
 
         val visibleMessages = if (inTrash && showAllTrashMessages) messages else messages.take(historyVisibleCount)
+        val visibleMessageIds = visibleMessages.mapTo(mutableSetOf()) { it.id }
+        selectedMessageIds.retainAll(visibleMessageIds)
+        var selectionActionButton: Button? = null
+        var selectVisibleButton: Button? = null
+        fun updateSelectionActions() {
+            val selectedCount = selectedMessageIds.size
+            selectionActionButton?.apply {
+                text = if (inTrash) "↑ Restaurer $selectedCount message(s)"
+                else "Mettre $selectedCount message(s) à la corbeille"
+                isEnabled = selectedCount > 0
+                alpha = if (isEnabled) 1f else 0.55f
+            }
+            selectVisibleButton?.text = if (selectedCount == visibleMessages.size && visibleMessages.isNotEmpty()) {
+                "Désélectionner tout"
+            } else "Tout sélectionner (${visibleMessages.size})"
+        }
+        if (!messageSelectionMode) {
+            historyContainer.addView(Button(this).apply {
+                text = "Sélectionner des messages"
+                textSize = 13f
+                setTextColor(accentDarkColor)
+                backgroundTintList = ColorStateList.valueOf(softSurfaceColor)
+                setOnClickListener {
+                    messageSelectionMode = true
+                    selectedMessageIds.clear()
+                    refreshHistory()
+                }
+            }, matchWidth().apply { bottomMargin = dp(8) })
+        } else {
+            val selectionBar = verticalCard()
+            selectionBar.addView(TextView(this).apply {
+                text = "Sélection multiple"
+                textSize = 15f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(inkColor)
+            }, matchWidth())
+            val selectionButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            selectVisibleButton = Button(this).apply {
+                textSize = 12f
+                setTextColor(accentDarkColor)
+                backgroundTintList = ColorStateList.valueOf(softSurfaceColor)
+                setOnClickListener {
+                    if (selectedMessageIds.containsAll(visibleMessageIds)) {
+                        selectedMessageIds.removeAll(visibleMessageIds)
+                    } else selectedMessageIds.addAll(visibleMessageIds)
+                    refreshHistory()
+                }
+            }
+            selectionButtons.addView(selectVisibleButton, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            selectionButtons.addView(Button(this).apply {
+                text = "Annuler"
+                textSize = 12f
+                setTextColor(accentDarkColor)
+                backgroundTintList = ColorStateList.valueOf(softSurfaceColor)
+                setOnClickListener {
+                    selectedMessageIds.clear()
+                    messageSelectionMode = false
+                    refreshHistory()
+                }
+            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { marginStart = dp(6) })
+            selectionBar.addView(selectionButtons, matchWidth().apply { topMargin = dp(4) })
+            selectionActionButton = Button(this).apply {
+                textSize = 13f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(Color.WHITE)
+                backgroundTintList = ColorStateList.valueOf(accentColor)
+                setOnClickListener { applySelectedMessages() }
+            }
+            selectionBar.addView(selectionActionButton, matchWidth().apply { topMargin = dp(6) })
+            updateSelectionActions()
+            historyContainer.addView(selectionBar, matchWidth().apply { bottomMargin = dp(10) })
+        }
         visibleMessages.forEach { item ->
             val card = verticalCard()
             val appLabel = supportedApps.firstOrNull { it.second == item.packageName }?.first ?: item.packageName
@@ -1491,6 +1565,17 @@ class MainActivity : Activity() {
             }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = dp(8)
             })
+            if (messageSelectionMode) {
+                metaRow.addView(CheckBox(this).apply {
+                    isChecked = item.id in selectedMessageIds
+                    buttonTintList = ColorStateList.valueOf(accentColor)
+                    contentDescription = "Sélectionner le message de ${item.senderName.ifBlank { item.title }}"
+                    setOnCheckedChangeListener { _, checked ->
+                        if (checked) selectedMessageIds.add(item.id) else selectedMessageIds.remove(item.id)
+                        updateSelectionActions()
+                    }
+                })
+            }
             card.addView(metaRow, matchWidth())
 
             val groupName = item.conversationName.ifBlank { item.title }
@@ -1618,6 +1703,29 @@ class MainActivity : Activity() {
             }, matchWidth().apply { topMargin = dp(4); bottomMargin = dp(12) })
         }
     }
+
+    private fun applySelectedMessages() {
+        val ids = selectedMessageIds.toList()
+        if (ids.isEmpty()) return
+        val restore = inTrash
+        selectedMessageIds.clear()
+        messageSelectionMode = false
+        historyQueryExecutor.execute {
+            runCatching {
+                synchronized(ArchiveEvents.databaseLock) {
+                    val store = NotificationStore(this)
+                    ids.forEach { id ->
+                        if (restore) store.restore(id) else store.moveNotificationToTrash(id)
+                    }
+                }
+            }
+            runOnUiThread {
+                if (!isFinishing && !isDestroyed) refreshHistory()
+            }
+        }
+    }
+
+
 
     private fun showImageFullscreen(path: String) {
         val bitmap = decodeSampledBitmap(path, maxOf(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels) * 2) ?: return
