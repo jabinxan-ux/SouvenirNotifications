@@ -503,13 +503,7 @@ class NotificationStore(context: Context) : SQLiteOpenHelper(context, "archive.d
         }
     }
 
-    private fun hasUsableAvatar(path: String?): Boolean =
-        !path.isNullOrBlank() && runCatching {
-            val file = File(path)
-            file.isFile && file.length() >= 3L && file.inputStream().use { input ->
-                input.read() == 0xFF && input.read() == 0xD8 && input.read() == 0xFF
-            }
-        }.getOrDefault(false)
+    private fun hasUsableAvatar(path: String?): Boolean { if (path.isNullOrBlank()) return false; val file = File(path); if (!file.isFile || file.length() < 16L) return false; val cacheKey = file.absolutePath + "::" + file.length() + "::" + file.lastModified(); avatarValidationCache.get(cacheKey)?.let { return it }; val usable = runCatching { val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }; android.graphics.BitmapFactory.decodeFile(file.absolutePath, bounds); if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@runCatching false; var sampleSize = 1; while (maxOf(bounds.outWidth / sampleSize, bounds.outHeight / sampleSize) > 64) sampleSize *= 2; val sample = android.graphics.BitmapFactory.decodeFile(file.absolutePath, android.graphics.BitmapFactory.Options().apply { inSampleSize = sampleSize; inPreferredConfig = android.graphics.Bitmap.Config.RGB_565 }); sample?.recycle(); sample != null }.getOrDefault(false); avatarValidationCache.put(cacheKey, usable); return usable }
 
     private fun normalizeForDuplicate(message: String, knownNames: List<String>): Set<String> =
         message.lineSequence().map { rawLine ->
@@ -1069,7 +1063,7 @@ class NotificationStore(context: Context) : SQLiteOpenHelper(context, "archive.d
         private const val DUPLICATE_WINDOW_MS = 30L * 1000L
         private const val EXACT_DUPLICATE_WINDOW_MS = 1_500L
         private const val CROSS_FORMAT_DUPLICATE_WINDOW_MS = 90L * 1000L
-        private val openStores = mutableSetOf<WeakReference<NotificationStore>>()
+        private val openStores = mutableSetOf<WeakReference<NotificationStore>>(); private val avatarValidationCache = android.util.LruCache<String, Boolean>(512)
 
         fun closeAll() {
             synchronized(openStores) {
