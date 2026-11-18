@@ -1,0 +1,24 @@
+.gradle/
+**/build/
+**/build-souvenir-*/
+.idea/
+*.iml
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+*.idsig
+keystore.properties
+
+# Machine-local caches and historical copies. In particular, work/ contains
+# old source snapshots and a local debug keystore; neither belongs in Git.
+.kotlin/
+work/
+outputs/
+
+# Common local/OS/editor files
+*.log
+Thumbs.db
+.DS_Store
+
