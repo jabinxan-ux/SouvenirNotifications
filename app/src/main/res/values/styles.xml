@@ -1,0 +1,12 @@
+<resources>
+    <style name="SouvenirTheme_Light" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorAccent">#059669</item>
+    </style>
+
+    <style name="SouvenirTheme_Dark" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:colorAccent">#34D399</item>
+        <item name="android:statusBarColor">#0C1B17</item>
+        <item name="android:navigationBarColor">#0C1B17</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

@@ -1,0 +1,57 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_initials">SN</string>
+    <string name="app_title">Souvenir</string>
+    <string name="app_disclaimer">Souvenir garde sur ce téléphone le texte et les aperçus transmis par les notifications. Il ne peut pas récupérer un contenu qu’une appli n’a pas notifié, ni les fichiers originaux.</string>
+    <string name="manage_notification_access">Gérer l’accès aux notifications</string>
+    <string name="notification_access_disclosure_title">À propos de l’accès aux notifications</string>
+    <string name="notification_access_disclosure">Pour archiver les notifications, Android doit autoriser Souvenir à y accéder, même lorsque l’application est fermée. Souvenir ne conserve que les applications que tu actives ensuite et pour lesquelles tu acceptes l’archivage. Le contenu choisi (texte, noms, photos de profil et médias fournis par Android) reste dans l’espace privé de l’application et n’est pas envoyé à l’éditeur. Tu peux retirer cet accès dans les réglages Android et supprimer ton historique à tout moment.</string>
+    <string name="continue_to_android_settings">Continuer vers les réglages</string>
+    <string name="privacy_and_data">Confidentialité et données</string>
+    <string name="advanced_settings">Réglages et diagnostic</string>
+    <string name="storage_and_backup">Stockage et sauvegardes</string>
+    <string name="expand_section">Afficher les détails</string>
+    <string name="collapse_section">Masquer les détails</string>
+    <string name="privacy_policy_text">Souvenir archive uniquement les notifications des applications que tu actives et acceptes. Selon ce qu’Android transmet, l’archive peut contenir le texte, le titre, le nom de la conversation et son type (privée ou de groupe), le nom et la photo de l’expéditeur, la date, ainsi que des aperçus ou pièces jointes photo/vidéo. Une application peut ne fournir que du texte; Souvenir ne peut pas récupérer les médias absents de la notification.\n\nEn option, si tu choisis le dossier WhatsApp/Media dans l’application, Souvenir peut y rechercher des photos, vidéos et fichiers audio déjà téléchargés, puis les copier dans son espace privé. Le dossier choisi peut être analysé à l’ouverture de Souvenir, après une notification WhatsApp et périodiquement en arrière-plan, tant que l’accès reste accordé. Tu peux retirer l’accès au dossier dans Stockage et sauvegardes; les fichiers déjà copiés restent jusqu’à leur suppression ou la désinstallation de l’application.\n\nCes informations servent à afficher ton historique, tes conversations et tes médias. Elles restent dans l’espace privé de Souvenir sur ce téléphone; aucun compte, serveur Souvenir, publicité ou outil d’analyse n’est utilisé. L’archive locale n’est pas chiffrée séparément. Le verrouillage facultatif utilise celui d’Android et ne chiffre pas les fichiers.\n\nTu peux arrêter l’archivage, déplacer des éléments dans la corbeille, les supprimer définitivement ou effacer l’historique. Les données restent sur le téléphone jusqu’à leur suppression ou la désinstallation de l’application.\n\nUne sauvegarde ZIP n’est pas chiffrée. Si tu choisis un emplacement cloud ou partages un média, le fournisseur sélectionné reçoit le fichier ou le média et applique ses propres règles. Les copies exportées doivent être supprimées séparément.\n\nPour toute question sur la confidentialité : jabinxan@gmail.com</string>
+    <string name="contact_privacy">Contacter par e-mail</string>
+    <string name="view_privacy_policy_online">Lire la politique en ligne</string>
+    <string name="browser_missing">Aucun navigateur n’est configuré.</string>
+    <string name="email_app_missing">Aucune application de messagerie n’est configurée.</string>
+    <string name="applications">Applications</string>
+    <string name="applications_hint">Faites défiler et touchez une appli pour ouvrir sa page</string>
+    <string name="enable_dark_mode">Activer le mode sombre</string>
+    <string name="disable_dark_mode">Désactiver le mode sombre</string>
+    <string name="media_storage">Stockage des médias</string>
+    <string name="manage_large_media">Gérer les médias les plus lourds</string>
+    <string name="backup_and_restore" tools:ignore="Typos">Sauvegarde et restauration</string>
+    <string name="backup_instructions">Historique, photos et vidéos seront réunis dans un fichier. Appuie sur « Créer », choisis où le garder, puis touche « Enregistrer ».</string>
+    <string name="create_backup">Créer une sauvegarde</string>
+    <string name="restore_from_file" tools:ignore="Typos">Restaurer depuis un fichier</string>
+    <string name="restore_replaces_history" tools:ignore="Typos">La restauration remplace l’historique actuel.</string>
+    <string name="tab_history">Historique</string>
+    <string name="tab_media">Médias</string>
+    <string name="tab_conversations">Conversations</string>
+    <string name="tab_trash">Corbeille</string>
+    <string name="capture_diagnostics">Dernière notification reçue : %1$s\nDernier élément archivé : %2$s\nDernier média sauvegardé : %3$s</string>
+    <plurals name="archived_media_count">
+        <item quantity="one">%d média</item>
+        <item quantity="other">%d médias</item>
+    </plurals>
+    <string name="storage_usage">%1$s · %2$s utilisés</string>
+    <string name="storage_usage_with_warning">%1$s\n%2$s</string>
+    <string name="storage_exceeds_1gb">L’archive dépasse 1 Go. Tu peux libérer de la place avec le bouton ci-dessus.</string>
+    <string name="all_apps">Toutes les applis</string>
+    <string name="diagnostics_by_app">Diagnostic par application</string>
+    <string name="archive">Archiver</string>
+    <string name="hide_calls_and_reactions">Masquer les appels et réactions dans l’historique</string>
+    <string name="app_capture_status">%1$s · %2$s</string>
+    <string name="capture_active">archivage actif</string>
+    <string name="capture_inactive">archivage inactif</string>
+    <string name="all_conversations">← Toutes les conversations</string>
+    <string name="restore">Restaurer</string>
+    <string name="delete_permanently">Supprimer définitivement</string>
+    <string name="move_to_trash">Mettre à la corbeille</string>
+    <string name="share">Partager</string>
+    <string name="delete_media">Supprimer ce média</string>
+    <string name="restore_all_trash">Restaurer toute la corbeille</string>
+    <string name="show_more_conversations">Afficher 60 conversations de plus</string>
+</resources>
