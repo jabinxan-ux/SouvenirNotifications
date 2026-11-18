@@ -1013,13 +1013,14 @@ class MainActivity : Activity() {
         refreshAccessStatus()
         refreshCaptureDetails()
         refreshBackupSummary()
-        refreshStorageSummary()
+        
         refreshWhatsAppMediaStatus()
         renderApplicationTabs()
         renderSelectedAppPanel()
         refreshModeSelector()
         refreshGalleryTypeSelector()
         refreshHistory()
+        refreshStorageSummary()
     }
 
     private fun refreshAccessStatus() {
